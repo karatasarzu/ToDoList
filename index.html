@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Licorice&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        html {
+            font-size: 24px;
+        }
+
+        body {
+            font-family: 'Licorice', cursive;
+        }
+
+        .done>span {
+            text-decoration: line-through;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+            box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+        }
+
+        @media (max-width: 940px) {
+            .container {
+                margin: 1rem;
+            }
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul>li {
+            line-height: 2;
+            display: flex;
+            align-items: center;
+        }
+
+        .delete {
+            margin-left: auto;
+            margin-right: .5rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        ul>li:hover .delete {
+            display: inline;
+        }
+
+        ul>li:nth-child(even) {
+            background-color: rgb(240, 240, 240);
+        }
+
+        input[type="checkbox"] {
+            margin-right: .5rem;
+        }
+
+        input[type="text"] {
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: black;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Todos</h1>
+
+        <form id="frmNew">
+            <input id="txtTask" type="text" autocomplete="off" required placeholder="Type something to do.." />
+            <button>Add</button>
+        </form>
+        <ul id="todos"></ul>
+    </div>
+
+    <script>
+        var todos = [];
+        var ulTodos = document.getElementById("todos");
+        var frm = document.getElementById("frmNew");
+        var txt = document.getElementById("txtTask");
+
+        function listTodos() {
+            todos.sort((a, b) => a.isDone - b.isDone);
+            save();
+            ulTodos.innerHTML = "";
+
+            for (var todo of todos) {
+                var li = document.createElement("li");
+
+                if (todo.isDone) {
+                    li.classList.add("done");
+                }
+
+                li.todo = todo;
+                var chk = document.createElement("input");
+                chk.onchange = statusChanged;
+                chk.checked = todo.isDone;
+                chk.type = "checkbox";
+                li.appendChild(chk);
+
+                var span = document.createElement("span");
+                span.textContent = todo.task;
+                li.appendChild(span);
+
+                var btn = document.createElement("i");
+                btn.onclick = deleteClicked;
+                btn.classList.add("fas");
+                btn.classList.add("fa-times");
+                btn.classList.add("delete");
+                li.appendChild(btn);
+
+                ulTodos.appendChild(li);
+            }
+        }
+
+        function deleteClicked() {
+            var todo = this.parentNode.todo;
+            var index = todos.indexOf(todo);
+            todos.splice(index, 1);
+            listTodos();
+        }
+
+        function statusChanged() {
+            this.parentNode.todo.isDone = this.checked;
+            listTodos();
+        }
+
+        function save() {
+            localStorage["data"] = JSON.stringify(todos);
+        }
+
+        function load() {
+            try {
+                todos = JSON.parse(localStorage["data"]);
+            } catch (error) {
+                todos = [{ task: "Do your homework", isDone: false }, { task: "Watch Netflix", isDone: true }];
+            }
+        }
+
+        frm.onsubmit = function (event) {
+            event.preventDefault();
+            var task = txt.value;
+            todos.unshift({ task: task, isDone: false });
+            listTodos();
+            txt.value = "";
+        };
+
+        load();
+        listTodos();
+    </script>
+</body>
+
+</html>
